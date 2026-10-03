@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SplitSmart: Group Budget Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="brand">Split<span>Smart</span></div>
+  <nav>
+    <a href="#overview" class="on">Dashboard</a>
+    <a href="#add">Add expense</a>
+    <a href="#members">Members</a>
+    <a href="#settle">Settle up</a>
+    <a href="#history">History</a>
+    <a href="#new-group">New group</a>
+  </nav>
+</aside>
+<main>
+  <div class="top" id="overview">
+    <div><h1 id="title">Loading…</h1><p class="sub" id="subtitle"></p></div>
+    <div class="tools">
+      <label>Group<select id="group-select"></select></label>
+      <label>Monthly budget (₹)<input id="budget" type="number" min="1" step="500"></label>
+      <button class="ghost" id="del-group" type="button" hidden>Delete group</button>
+      <button class="ghost" data-pal="yellow" aria-pressed="true">Yellow</button>
+      <button class="ghost" data-pal="pink" aria-pressed="false">Pink</button>
+    </div>
+  </div>
+
+  <div id="dash" hidden>
+    <div class="kpis">
+      <div class="card kpi"><small>Spent this month</small><b id="k-spent"></b></div>
+      <div class="card kpi"><small>Budget left</small><b id="k-left"></b></div>
+      <div class="card kpi"><small>Projected month-end</small><b id="k-proj"></b></div>
+      <div class="card kpi"><small>Status</small><b><span class="badge" id="k-status"></span></b></div>
+    </div>
+
+    <div class="hero">
+      <div class="card">
+        <h2>Budget burn-down</h2>
+        <p class="sub">Solid line is what you spent. Dotted line is where you'll land at the current pace.</p>
+        <div class="chart"><canvas id="c-burn" role="img" aria-label="Budget burn-down line chart"></canvas></div>
+        <h2 style="margin-top:20px">What if we cut spending?</h2>
+        <p class="sub">Set a cut for each category you could reduce. Cuts apply to the rest of the month and update the dotted line.</p>
+        <div class="simgrid" id="sim-grid"></div>
+        <p class="note" id="sim-note"></p>
+        <button class="ghost" id="sim-reset" type="button">Reset cuts</button>
+      </div>
+      <div class="card">
+        <h2>Spending by category</h2>
+        <div class="chart"><canvas id="c-cat" role="img" aria-label="Spending by category donut chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>Paid vs fair share</h2>
+        <p class="sub">Who covered more than their share.</p>
+        <div class="chart sm"><canvas id="c-mem" role="img" aria-label="Paid versus share per member"></canvas></div>
+      </div>
+      <div class="card" id="settle">
+        <h2>Settle up</h2>
+        <p class="sub">The fewest payments that clear every balance.</p>
+        <ul class="settle" id="settle-list"></ul>
+      </div>
+    </div>
+
+    <div class="card" id="add" style="margin-bottom:14px">
+      <h2>Add expense</h2>
+      <form id="form">
+        <label>What was it for<input id="f-desc" required maxlength="60" placeholder="Dinner at Fisherman's"></label>
+        <label>Amount (₹)<input id="f-amt" type="number" min="1" step="any" required></label>
+        <label>Category<select id="f-cat"></select></label>
+        <label>Paid by<select id="f-by"></select></label>
+        <label>Date<input id="f-date" type="date" required></label>
+        <label>Split<select id="f-split"><option value="equal">Equally</option><option value="percent">By percentage</option><option value="exact">By exact amount</option></select></label>
+        <div id="split-box"></div>
+        <button type="submit">Save expense</button>
+      </form>
+      <p class="msg" id="msg" role="status"></p>
+    </div>
+
+    <div class="card" id="members" style="margin-bottom:14px">
+      <h2>Members</h2>
+      <div class="table-wrap"><table><thead><tr><th>Name</th><th class="n">Paid</th><th class="n">Share</th><th class="n">Balance</th><th></th></tr></thead><tbody id="mem-body"></tbody></table></div>
+      <form id="mform"><label>Add a member<input id="m-name" maxlength="40" required placeholder="Name"></label><button type="submit">Add member</button></form>
+      <p class="msg" id="mmsg" role="status"></p>
+    </div>
+
+    <div class="card" id="history" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h2>Expenses</h2><button class="ghost" id="clear-ex" type="button">Clear all expenses</button></div>
+      <p class="sub">Expenses far above their category's average are flagged.</p>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Expense</th><th>Category</th><th>Paid by</th><th>Split</th><th class="n">Amount</th><th></th></tr></thead><tbody id="ex-body"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="card" id="new-group">
+    <h2>Create a group</h2>
+    <form id="gform">
+      <label>Group name<input id="g-name" required maxlength="40" placeholder="Flat 402"></label>
+      <label>Monthly budget (₹)<input id="g-budget" type="number" min="1" required></label>
+      <label>Members (comma separated)<input id="g-members" required placeholder="Asha, Ben, Chitra"></label>
+      <button type="submit">Create group</button>
+    </form>
+    <p class="msg" id="gmsg" role="status"></p>
+  </div>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
